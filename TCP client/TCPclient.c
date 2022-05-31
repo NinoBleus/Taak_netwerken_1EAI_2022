@@ -1,6 +1,3 @@
-// gcc 7_TCP_client.c -lws2_32 -o 7_TCP_client.exe
-// _WIN32_WINNT version constants --> https://stackoverflow.com/questions/15370033/how-to-use-inet-pton-with-the-mingw-compiler
-
 #define _WIN32_WINNT 0x0601
 
 #include <winsock2.h>
