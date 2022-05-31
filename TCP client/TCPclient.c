@@ -145,6 +145,7 @@ int main( int argc, char * argv[] )
 		{
 			break;
 		}
+		strcat(user_message, "\n");
 		number_of_bytes_send = send( internet_socket, user_message, strlen(user_message), 0 );
 	}
 
