@@ -35,12 +35,17 @@
 	void OSInit( void ) {}
 	void OSCleanup( void ) {}
 #endif
-
-
-#define PORT "20022"   // port we're listening on
+#define PORT "9034"   // port we're listening on
 
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)
+{
+    if (sa->sa_family == AF_INET) {
+        return &(((struct sockaddr_in*)sa)->sin_addr);
+    }
+
+    return &(((struct sockaddr_in6*)sa)->sin6_addr);
+}
 
 int main(void)
 {
@@ -177,12 +182,4 @@ int main(void)
     } // END for(;;)--and you thought it would never end!
 
     return 0;
-}
-void *get_in_addr(struct sockaddr *sa)
-{
-    if (sa->sa_family == AF_INET) {
-        return &(((struct sockaddr_in*)sa)->sin_addr);
-    }
-
-    return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
