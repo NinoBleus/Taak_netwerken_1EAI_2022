@@ -133,28 +133,24 @@ void execution( int internet_socket )
 	struct sockaddr_storage client_internet_address;
 	socklen_t client_internet_address_length = sizeof client_internet_address;
 
-	int packet_loss_Counter_TimeOut = 0;
-	int packet_Loss_Counter_Timeout_Print = 0;
-	double packet_Loss_Percentage = 0.0;
-
 	int amount_Of_Receiving_Packets=0;
-	char yes_Or_no = "n";
+	char yes_Or_no = 'n';
 	int timeout = 0;
 
 	printf("Would u like to add a custom time-out? [y/n]\n");
-	printf("The standard value of the time-out is 0 seconds.\n", );
-	scanf("%c", &yes_or_no);
+	printf("The standard value of the time-out is 0 seconds.\n");
+	scanf("%c", &yes_Or_no);
 
-	if(yes_Or_no == "y")
+	if(yes_Or_no == 'y')
 	{
 		printf("Enter custom timeout time in seconds:");
 		scanf("%d", &timeout);
 		fprintf(STATISCALDATA, "Custom timeout = %d seconds\n",timeout);
 		timeout = timeout*1000;
 	}
-	else if(yes_Or_no == "n")
+	else if(yes_Or_no == 'n')
 	{
-		fprintf(STATISCALDATA, "No changes were made to time-out time, it remains 0 seconds.\n", );
+		fprintf(STATISCALDATA, "No changes were made to time-out time, it remains 0 seconds.\n");
 	}
 	else
 	{
@@ -166,20 +162,18 @@ void execution( int internet_socket )
 	printf("How many packets would u like to receive? (enter numeral value)");
 	scanf("%d", &amount_Of_Receiving_Packets);
 
-	clock_t begin = clock();
 
 		if (setsockopt(internet_socket, SOL_SOCKET, SO_RCVTIMEO,&timeout,sizeof(timeout)) < 0)
 		{
 			perror("Error");
 		}
 
-	for (i = 1; i < amount_Of_Receiving_Packets; i++) //For loop for the amount of packets
+	for (int i = 1; i < amount_Of_Receiving_Packets; i++) //For loop for the amount of packets
 	{
 		number_of_bytes_received = recvfrom( internet_socket, buffer, ( sizeof buffer ) - 1, 0, (struct sockaddr *) &client_internet_address, &client_internet_address_length );
 		if( number_of_bytes_received == -1 )
 		{
 			perror( "recvfrom" );
-			++packet_loss_Counter_TimeOut
 		}
 		else
 		{

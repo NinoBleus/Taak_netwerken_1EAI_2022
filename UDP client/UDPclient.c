@@ -121,10 +121,10 @@ void execution( int internet_socket, struct sockaddr * internet_address, socklen
   int lenght_Of_Packet;
 
   printf("Please insert the amount of packets u would like to send:\n");
-  scanf("%d", %total_Packets_Amount);
+  scanf("%d", &total_Packets_Amount);
 
   printf("What would u like to write in the package? (100 char max)\n");
-  scanf("%s", %user_Input_Packet);
+  scanf("%s", user_Input_Packet);
   lenght_Of_Packet = strlen(user_Input_Packet);
   user_Input_Packet[lenght_Of_Packet] = '\0';
 
@@ -140,7 +140,7 @@ void execution( int internet_socket, struct sockaddr * internet_address, socklen
 		perror( "sendto" );
 	}
   printf("Sending...\n");
-  for (i = 0; i < total_Packets_Amount; i++)
+  for (int i = 0; i < total_Packets_Amount; i++)
   {
     sendto( internet_socket, user_Input_Packet, lenght_Of_Packet, 0, internet_address, internet_address_length );
   }
