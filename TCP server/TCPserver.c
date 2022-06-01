@@ -104,23 +104,21 @@ int main(void)
         exit(2);
     }
 
-    freeaddrinfo(ai); // all done with this
+    freeaddrinfo(ai);
 
-    // listen
     if (listen(listener, 10) == -1) {
         perror("listen");
         exit(3);
     }
 
-    // add the listener to the master set
+    
     FD_SET(listener, &master);
 
-    // keep track of the biggest file descriptor
-    fdmax = listener; // so far, it's this one
+    fdmax = listener;
 
     // main loop
     for(;;) {
-        read_fds = master; // copy it
+        read_fds = master;
         if (select(fdmax+1, &read_fds, NULL, NULL, NULL) == -1) {
             perror("select");
             exit(4);
@@ -128,7 +126,7 @@ int main(void)
 
         // run through the existing connections looking for data to read
         for(i = 0; i <= fdmax; i++) {
-            if (FD_ISSET(i, &read_fds)) { // we got one!!
+            if (FD_ISSET(i, &read_fds)) {
                 if (i == listener) {
                     // handle new connections
                     addrlen = sizeof remoteaddr;
