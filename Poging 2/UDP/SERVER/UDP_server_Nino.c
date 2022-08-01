@@ -48,7 +48,7 @@ void remove_spaces(char* s) {
         while (*d == ' ') {
             ++d;
         }
-    } while ((*s++ = *d++)); 
+    } while ((*s++ = *d++));
 }
 
 void dissect(double* min, double* max, double* avg, char* buffer) {
@@ -111,7 +111,7 @@ int main( int argc, char * argv[] )
 
 	struct addrinfo internet_address_setup, *result_head, *result_item;
 	memset( &internet_address_setup, 0, sizeof internet_address_setup );
-	internet_address_setup.ai_family = AF_UNSPEC; // AF_INET or AF_INET6 to force version
+	internet_address_setup.ai_family = AF_INET; // AF_INET or AF_INET6 to force version
 	internet_address_setup.ai_socktype = SOCK_DGRAM;
 	internet_address_setup.ai_flags = AI_PASSIVE; // use ANY address for IPv4 and IPv6
 
