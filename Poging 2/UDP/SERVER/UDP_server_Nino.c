@@ -6,6 +6,9 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
 void print_ip_address( unsigned short family, struct sockaddr * ip )
 {
 	void * ip_address;
@@ -45,7 +48,7 @@ void remove_spaces(char* s) {
         while (*d == ' ') {
             ++d;
         }
-    } while (*s++ = *d++);
+    } while ((*s++ = *d++)); 
 }
 
 void dissect(double* min, double* max, double* avg, char* buffer) {
@@ -99,11 +102,11 @@ int main( int argc, char * argv[] )
 	fflush(stdin);
 
 	printf("Amout of packages: \n");
-	scanf("%d", amount);
+	scanf("%d", &amount);
 	fflush(stdin);
 
 	printf("Time out: \n");
-	scanf("%d", timeOut);
+	scanf("%d", &timeOut);
 	fflush(stdin);
 
 	struct addrinfo internet_address_setup, *result_head, *result_item;
@@ -160,14 +163,14 @@ int main( int argc, char * argv[] )
 
 	printf("Creating CSV file...\n");
 	csvOUT = fopen("PacketData.csv", "w");
-	if (csvOUT == NULL)) {
+	if (csvOUT == NULL) {
 		printf("PacketDate.csv not made\n");
 		exit(4);
 	}
 
 	printf("Creating Stats file...\n");
 	stats = fopen("Stats.csv", "w");
-	if (stats == NULL)) {
+	if (stats == NULL) {
 		printf("stast.csv not made\n");
 		exit(4);
 	}
@@ -234,10 +237,36 @@ int main( int argc, char * argv[] )
 
 		printf("%s\n", buffer);
 		remove_spaces(buffer);
+		dissect(&min, &max, &avg, buffer);
+		fwrite(&buffer, strlen(buffer), 1, csvOUT);
+    fwrite("\n", sizeof(char), 1, csvOUT);
 
-
+		printf("Packet %d/%d\n\n", i+1, amount);
 	}
 
+	clock_t stop = clock();
+	float elapsed_time = (double)(stop - start) / CLOCKS_PER_SEC;
+
+	char tmp[100] = "\0";
+
+	printf("\n");
+
+	sprintf(tmp, "Elapsed Time: %.2f sec\n", elapsed_time);
+	printf("%s", tmp);
+	fwrite(&tmp, strlen(tmp), 1, stats);
+
+	sprintf(tmp, "RECV: %d | EXPE: %d | LOSS: %d%%\n", i, amount, abs(((i - amount)/amount)*100));
+	printf("%s", tmp);
+	fwrite(&tmp, strlen(tmp), 1, stats);
+
+	sprintf(tmp, "MIN: %f | MAX: %f | AVG: %f\n", min, max, (avg/i));
+	printf("%s", tmp);
+	fwrite(&tmp, strlen(tmp), 1, stats);
+
+
+
+	fclose(csvOUT);
+	fclose(stats);
 	close( internet_socket );
 
 	WSACleanup();
