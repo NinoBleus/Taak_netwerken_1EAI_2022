@@ -35,7 +35,7 @@
 	void OSInit( void ) {}
 	void OSCleanup( void ) {}
 #endif
-#define PORT "9034"   // port we're listening on
+#define PORT "20010"   // port we're listening on
 
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)
@@ -111,7 +111,7 @@ int main(void)
         exit(3);
     }
 
-    
+
     FD_SET(listener, &master);
 
     fdmax = listener;
