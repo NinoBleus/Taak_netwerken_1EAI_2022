@@ -157,6 +157,7 @@ int main( int argc, char * argv[] )
   }
 
 	int shutdown_return;
+  thread_Stop = 1;
 	shutdown_return = shutdown( internet_socket, SD_SEND ); //Shutdown Send == SD_SEND ; Receive == SD_RECEIVE ; Send/Receive == SD_BOTH ; https://blog.netherlabs.nl/articles/2009/01/18/the-ultimate-so_linger-page-or-why-is-my-tcp-not-reliable --> Linux : Shutdown Send == SHUT_WR ; Receive == SHUT_RD ; Send/Receive == SHUT_RDWR
 	if( shutdown_return == -1 )
 	{
@@ -165,7 +166,7 @@ int main( int argc, char * argv[] )
 	}
 
 	close( internet_socket );
-
+  pthread_join(receive, NULL);
 	WSACleanup();
 
 	return 0;
