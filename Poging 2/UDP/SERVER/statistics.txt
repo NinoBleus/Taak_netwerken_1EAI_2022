@@ -1,0 +1,3 @@
+Elapsed Time: 5.96 sec
+RECV: 10 | EXPE: 10 | LOSS: 0%
+MIN: 0.000000 | MAX: 0.000000 | AVG: 0.000000
