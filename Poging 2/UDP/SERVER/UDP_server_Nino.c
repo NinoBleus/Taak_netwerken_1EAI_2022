@@ -73,7 +73,7 @@ void dissect(double* min, double* max, double* avg, char* buffer) {
 	tmp[j] = '\0';
 
 	data = strtod(tmp, NULL);
-	printf("[+] Extraced %f\n", data);
+	printf("Extraced %f\n", data);
 	if (data < *min || *min == 0.0) {
 		*min = data;
 	}
@@ -100,11 +100,11 @@ int main( int argc, char * argv[] ) {
   int amount = 0;
   int timeout = 0;
 
-  printf("\nSet Server IP:\n");
+  printf("\nServer IP:\n");
   scanf("%s", server_ip);
   fflush(stdin);
 
-  printf("\nSet UDP Server PORT:\n");
+  printf("\nUDP Server PORT:\n");
   scanf("%s", server_port);
   fflush(stdin);
 
@@ -174,17 +174,17 @@ int main( int argc, char * argv[] ) {
   FILE *outFile = NULL;
 	FILE *statsFile = NULL;
 
-  printf("[+] Creating output.csv...\n");
+  printf("Creating output.csv...\n");
   outFile = fopen("packet_data.csv", "w");
   if (outFile == NULL) {
-    printf("\n[-] Could not create packet_data.csv!\n");
+    printf("\nCould not create packet_data.csv!\n");
     exit(4);
   }
 
-	printf("[+] Creating statistics.txt...\n");
+	printf("Creating statistics.txt...\n");
   statsFile = fopen("statistics.txt", "w");
   if (statsFile == NULL) {
-    printf("\n[-] Could not create statistics.txt!\n");
+    printf("\nCould not create statistics.txt!\n");
     exit(4);
   }
 //FILE HANDLING
