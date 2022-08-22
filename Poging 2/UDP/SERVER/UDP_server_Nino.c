@@ -9,8 +9,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-void print_ip_address( unsigned short family, struct sockaddr * ip )
-{
+
+//PRINTS CONNECTION INFO
+void print_ip_address( unsigned short family, struct sockaddr * ip ) {
 	void * ip_address;
 	char * ip_version;
 	char ip_string[INET6_ADDRSTRLEN];
@@ -32,16 +33,17 @@ void print_ip_address( unsigned short family, struct sockaddr * ip )
 	printf( "%s -> %s\n", ip_version, ip_string );
 }
 
-void ai_print_ip_address( struct addrinfo * ip )
-{
+void ai_print_ip_address( struct addrinfo * ip ) {
 	print_ip_address( ip->ai_family, ip->ai_addr );
 }
 
-void ss_print_ip_address( struct sockaddr_storage * ip )
-{
+void ss_print_ip_address( struct sockaddr_storage * ip ) {
 	print_ip_address( ip->ss_family, (struct sockaddr*) ip );
 }
+//PRINTS CONNECTION INFO
 
+//REMOVES SPACES
+//https://stackoverflow.com/questions/1726302/remove-spaces-from-a-string-in-c
 void remove_spaces(char* s) {
     char* d = s;
     do {
@@ -50,7 +52,9 @@ void remove_spaces(char* s) {
         }
     } while ((*s++ = *d++));
 }
+//REMOVES SPACES
 
+//DISSECT PACKET DATA
 void dissect(double* min, double* max, double* avg, char* buffer) {
 	int count = 0;
 	int j = 0;
@@ -69,7 +73,7 @@ void dissect(double* min, double* max, double* avg, char* buffer) {
 	tmp[j] = '\0';
 
 	data = strtod(tmp, NULL);
-	printf("Extraced: %f\n", data);
+	printf("[+] Extraced %f\n", data);
 	if (data < *min || *min == 0.0) {
 		*min = data;
 	}
@@ -78,51 +82,58 @@ void dissect(double* min, double* max, double* avg, char* buffer) {
 	}
 	*avg += data;
 }
+//DISSECT PACKET DATA
 
-int main( int argc, char * argv[] )
-{
+int main( int argc, char * argv[] ) {
+//START SOCKET API
 	WSADATA wsaData; //WSAData wsaData; //Could be different case
 	if( WSAStartup( MAKEWORD(2,0), &wsaData ) != 0 ) // MAKEWORD(1,1) for Winsock 1.1, MAKEWORD(2,0) for Winsock 2.0:
 	{
 		fprintf( stderr, "WSAStartup failed.\n" );
 		exit( 1 );
 	}
+//START SOCKET API
 
-	char serverIP[45]= "\0";
-	char serverPoort[5]= "\0";
-	int amount = 0;
-	int timeOut = 0;
+//ASK USER FOR SERVER IP, PORT, AMOUNT
+  char server_ip[45] = "\0";
+  char server_port[5] = "\0";
+  int amount = 0;
+  int timeout = 0;
 
-	printf("Server IP: \n");
-	scanf("%s", serverIP);
-	fflush(stdin);
+  printf("\nSet Server IP:\n");
+  scanf("%s", server_ip);
+  fflush(stdin);
 
-	printf("Server Poort: \n");
-	scanf("%s", serverPoort);
-	fflush(stdin);
+  printf("\nSet UDP Server PORT:\n");
+  scanf("%s", server_port);
+  fflush(stdin);
 
-	printf("Amout of packages: \n");
+  printf("\nAmount Of Packets:\n");
 	scanf("%d", &amount);
 	fflush(stdin);
 
-	printf("Time out: \n");
-	scanf("%d", &timeOut);
+  printf("\nTimeout (in seconds):\n");
+	scanf("%d", &timeout);
 	fflush(stdin);
+//ASK USER FOR SERVER IP, PORT, AMOUNT
 
+//SOCKET SETUP
 	struct addrinfo internet_address_setup, *result_head, *result_item;
 	memset( &internet_address_setup, 0, sizeof internet_address_setup );
-	internet_address_setup.ai_family = AF_INET; // AF_INET or AF_INET6 to force version
+	internet_address_setup.ai_family = AF_INET; // AF_INET or AF_INET6 to force version AF_UNSPEC
 	internet_address_setup.ai_socktype = SOCK_DGRAM;
 	internet_address_setup.ai_flags = AI_PASSIVE; // use ANY address for IPv4 and IPv6
 
 	int getaddrinfo_return;
-	getaddrinfo_return = getaddrinfo( serverIP, serverPoort, &internet_address_setup, &result_head);
+	getaddrinfo_return = getaddrinfo( server_ip, server_port, &internet_address_setup, &result_head );
 	if( getaddrinfo_return != 0 )
 	{
 		fprintf( stderr, "getaddrinfo: %s\n", gai_strerror( getaddrinfo_return ) );
 		exit( 2 );
 	}
+//SOCKET SETUP
 
+//CREATE SOCKET (internet_address_setup)
 	int internet_socket;
 
 	result_item = result_head; //take first of the linked list
@@ -144,7 +155,7 @@ int main( int argc, char * argv[] )
 			}
 			else
 			{
-				printf( "Bind to " );
+				printf( "\nBind to " );
 				ai_print_ip_address( result_item );
 				break; //stop running through the linked list
 			}
@@ -157,119 +168,132 @@ int main( int argc, char * argv[] )
 		exit( 3 );
 	}
 	freeaddrinfo( result_head ); //free the linked list
+//CREATE SOCKET (internet_address_setup)
 
-	FILE *csvOUT = NULL;
-	FILE *stats = NULL;
+//FILE HANDLING
+  FILE *outFile = NULL;
+	FILE *statsFile = NULL;
 
-	printf("Creating CSV file...\n");
-	csvOUT = fopen("PacketData.csv", "w");
-	if (csvOUT == NULL) {
-		printf("PacketDate.csv not made\n");
-		exit(4);
-	}
+  printf("[+] Creating output.csv...\n");
+  outFile = fopen("packet_data.csv", "w");
+  if (outFile == NULL) {
+    printf("\n[-] Could not create packet_data.csv!\n");
+    exit(4);
+  }
 
-	printf("Creating Stats file...\n");
-	stats = fopen("Stats.csv", "w");
-	if (stats == NULL) {
-		printf("stast.csv not made\n");
-		exit(4);
-	}
+	printf("[+] Creating statistics.txt...\n");
+  statsFile = fopen("statistics.txt", "w");
+  if (statsFile == NULL) {
+    printf("\n[-] Could not create statistics.txt!\n");
+    exit(4);
+  }
+//FILE HANDLING
 
-	fd_set fds ;
-	int n ;
-	struct timeval tv ;
+//TIMEOUT SETUP
+//https://stackoverflow.com/questions/1824465/set-timeout-for-winsock-recvfrom
+	fd_set fds;
+	int n;
+	struct timeval tv;
 
-	// Set up the file descriptor set.
+// Set up the file descriptor set.
 	FD_ZERO(&fds) ;
 	FD_SET(internet_socket, &fds) ;
 
-	// Set up the struct timeval for the timeout.
-	tv.tv_sec = timeOut;
-	tv.tv_usec = 0 ;
+// Set up the struct timeval for the timeout.
+	tv.tv_sec = timeout; //tv.tv_sec SECONDS
+	tv.tv_usec = 0;
+//TIMEOUT SETUP
 
-	//data bijhouden
+//PACKET DATA
 	double min = 0.0;
 	double max = 0.0;
 	double avg = 0.0;
+//PACKET DATA
 
-	//receiving messages
+//RECEIVE MSG
 	int number_of_bytes_received = 0;
-	char buffer[1000];
-	clock_t start;
+	char buffer[1000] = "\0";
+	clock_t begin_time;
 	int i;
 
-	struct sockaddr_storage client_ip_address;
+  struct sockaddr_storage client_ip_address;
 	socklen_t client_ip_address_length = sizeof client_ip_address;
 
-	printf("Luisteren...\n");
-	for (i = 0; i < amount; i++)
-	{
-		strcpy(buffer, "\0");
+  printf("Listening...\n");
+  for (i = 0; i < amount; i++) {
+    strcpy(buffer, "\0");
 
-		// Wait until timeout or data received.
-		n = select ( internet_socket, &fds, NULL, NULL, &tv ) ;
-		if (n == 0)
-		{
-		  printf("Timeout..\n");
-		 	exit(5);
+		//TIMEOUT
+		n = select ( internet_socket, &fds, NULL, NULL, &tv );
+		if ( n == 0) {
+			printf("Timeout\n");
+			printf("RECV: %d | EXPE: %d | LOSS: %d%%\n", i, amount, abs(((i - amount)/amount)*100));
+			printf("MIN: %f | MAX: %f | AVG: %f\n", min, max, (avg/i));
+			exit(5);
 		}
-		else if( n == -1 )
-		{
-		  printf("Error..\n");
-		  exit(6);
+		else if( n == -1 ) {
+			printf("Error in timeout!\n");
+			exit(6);
+		}
+		//TIMEOUT
+
+    number_of_bytes_received = 0;
+    number_of_bytes_received = recvfrom( internet_socket, buffer, ( sizeof buffer ) - 1, 0, (struct sockaddr *) &client_ip_address, &client_ip_address_length );
+
+  	if( number_of_bytes_received == -1 ) {
+  		printf( "errno = %d\n", WSAGetLastError() ); //https://docs.microsoft.com/en-us/windows/win32/winsock/windows-sockets-error-codes-2
+  		perror( "recvfrom" );
+  	}
+
+		if (i == 0) {
+			begin_time = clock();
 		}
 
-		number_of_bytes_received = 0;
-		number_of_bytes_received = recvfrom( internet_socket, buffer, ( sizeof buffer ) - 1, 0, (struct sockaddr *) &client_ip_address, &client_ip_address_length );
-		if( number_of_bytes_received == -1 )
-		{
-			printf( "errno = %d\n", WSAGetLastError() ); //https://docs.microsoft.com/en-us/windows/win32/winsock/windows-sockets-error-codes-2
-			perror( "recvfrom" );
-		}
+  	buffer[number_of_bytes_received] = '\0';
 
-		if(i == 0)
-			{
-				start = clock();
-			}
-		buffer[number_of_bytes_received] = '\0';
-		printf( "Got %s from ", buffer );
-		ss_print_ip_address( &client_ip_address );
+    printf("\nReceiving from ");
+  	ss_print_ip_address( &client_ip_address );
+    printf("%s\n", buffer);
 
-		printf("%s\n", buffer);
+    printf("Writing to output.csv...\n");
 		remove_spaces(buffer);
 		dissect(&min, &max, &avg, buffer);
-		fwrite(&buffer, strlen(buffer), 1, csvOUT);
-    fwrite("\n", sizeof(char), 1, csvOUT);
+    fwrite(&buffer, strlen(buffer), 1, outFile);
+    fwrite("\n", sizeof(char), 1, outFile);
 
-		printf("Packet %d/%d\n\n", i+1, amount);
-	}
+    printf("Packet %d/%d\n\n", i+1, amount);
+  }
+//RECEIVE MSG
 
-	clock_t stop = clock();
-	float elapsed_time = (double)(stop - start) / CLOCKS_PER_SEC;
+//ELAPSED TIME
+	clock_t end_time = clock();
+	float elapsed_time = (double)(end_time - begin_time) / CLOCKS_PER_SEC;
+//ELAPSED TIME
 
+//WRITE STATSFILE
 	char tmp[100] = "\0";
 
 	printf("\n");
 
 	sprintf(tmp, "Elapsed Time: %.2f sec\n", elapsed_time);
 	printf("%s", tmp);
-	fwrite(&tmp, strlen(tmp), 1, stats);
+	fwrite(&tmp, strlen(tmp), 1, statsFile);
 
 	sprintf(tmp, "RECV: %d | EXPE: %d | LOSS: %d%%\n", i, amount, abs(((i - amount)/amount)*100));
 	printf("%s", tmp);
-	fwrite(&tmp, strlen(tmp), 1, stats);
+	fwrite(&tmp, strlen(tmp), 1, statsFile);
 
 	sprintf(tmp, "MIN: %f | MAX: %f | AVG: %f\n", min, max, (avg/i));
 	printf("%s", tmp);
-	fwrite(&tmp, strlen(tmp), 1, stats);
+	fwrite(&tmp, strlen(tmp), 1, statsFile);
+//WRITE STATSFILE
 
-
-
-	fclose(csvOUT);
-	fclose(stats);
+//CLOSE CONNECTION & CLEANUP
+  fclose(outFile);
+	fclose(statsFile);
 	close( internet_socket );
-
 	WSACleanup();
+//CLOSE CONNECTION & CLEANUP
 
 	return 0;
 }
